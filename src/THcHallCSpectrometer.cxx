@@ -377,9 +377,12 @@ Int_t THcHallCSpectrometer::ReadDatabase( const TDatime& date )
   cout <<  "fPcentral = "         <<  fPcentral << " " <<fPCentralOffset << endl;
   cout <<  "fThetalab = "         <<  fTheta_lab << " " <<fThetaCentralOffset << endl;
   fPcentral= fPcentral*(1.+fPCentralOffset/100.);
+  cout <<  "Now fPcentral = "         <<  fPcentral << endl;
   // Check that these offsets are in radians
   fTheta_lab=fTheta_lab + fThetaCentralOffset*TMath::RadToDeg();
+  cout <<  "fPhi_lab     = "         <<  fPhi_lab << endl;
   Double_t ph = fPhi_lab+fPhiOffset*TMath::RadToDeg();
+  cout <<  "Now phi     = "         <<  ph << endl;
   // SetCentralAngles method in podd THaSpectrometer
   // fTheta_lab and ph are geographical angles, converts to spherical coordinates
   // Need to set fTheta_lab to negative for spectrometer like HMS on beam right

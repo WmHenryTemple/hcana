@@ -1496,6 +1496,7 @@ void THcHodoscope::TrackEffTest(void)
   PadHigh[1]=fyHiScin[0];
   PadHigh[3]=fyHiScin[1];
   //
+  //  Bool_t efftest_debug = kTRUE;
   Bool_t efftest_debug = kFALSE;
   if (efftest_debug) cout << " spec = " << GetApparatus()->GetName()[0] << endl;
   Double_t PadPosLo[4];
@@ -1589,6 +1590,7 @@ void THcHodoscope::TrackEffTest(void)
            xdiffTest= TMath::Abs(x1_proj-fClustPos[2][ic2])<trackeff_scint_xdiff_max;
           if (xdiffTest) fPlanes[0]->SetClusterUsedFlag(ic0,1.);
           if (xdiffTest) fPlanes[2]->SetClusterUsedFlag(ic2,1.);
+	  if (efftest_debug) cout << "\t\tic0,ic2,xdiff:"<<ic0<<"\t"<<ic2<<"\t"<<xdiffTest<<endl;
       }
     }
     }
@@ -1599,6 +1601,7 @@ void THcHodoscope::TrackEffTest(void)
            ydiffTest= TMath::Abs(fClustPos[1][ic1]-fClustPos[3][ic3])<trackeff_scint_ydiff_max;
           if (ydiffTest) fPlanes[1]->SetClusterUsedFlag(ic1,1.);
           if (ydiffTest) fPlanes[3]->SetClusterUsedFlag(ic3,1.);
+	  if (efftest_debug) cout << "\t\tic1,ic3,ydiff:"<<ic1<<"\t"<<ic3<<"\t"<<ydiffTest<<endl;
        }
     }
     }
@@ -1607,6 +1610,8 @@ void THcHodoscope::TrackEffTest(void)
   }
   //
   if (fTrackEffTestNScinPlanes == 3 && num_good_plane_hit==3) {
+    //    mycntr++;
+    //    cout<<mycntr;
     xdiffTest=kFALSE;
     ydiffTest=kFALSE;
     // Check if two X planes hit

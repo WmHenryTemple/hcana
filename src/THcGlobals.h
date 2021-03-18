@@ -10,5 +10,4 @@
 
 R__EXTERN class THcParmList*  gHcParms;      //List of global symbolic variables
 R__EXTERN class THcDetectorMap*  gHcDetectorMap;   //Cached map file
-
 #endif

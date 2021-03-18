@@ -8,7 +8,6 @@
 #include "THcHitList.h"
 
 class TDatime;
-
 class THaApparatus;
 class THaEvData;
 

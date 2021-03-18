@@ -125,7 +125,8 @@ Int_t THcScalerEvtHandler::End( THaRunBase* )
     AnalyzeBuffer(rdata,kFALSE);
   }
   if (fDebugFile) *fDebugFile << "scaler tree ptr  "<<fScalerTree<<endl;
-    evNumberR = -1;
+  evNumber += 1;
+  evNumberR = evNumber;
   if (fScalerTree) fScalerTree->Fill();
 
   for( vector<UInt_t*>::iterator it = fDelayedEvents.begin();
@@ -204,6 +205,10 @@ Int_t THcScalerEvtHandler::Analyze(THaEvData *evdata)
 {
   Int_t lfirst=1;
 
+  if(evdata->GetEvNum() > 0) {
+    evNumber=evdata->GetEvNum();
+    evNumberR = evNumber;
+  }
   if ( !IsMyEvent(evdata->GetEvType()) ) return -1;
 
   if (fDebugFile) {
@@ -258,8 +263,6 @@ Int_t THcScalerEvtHandler::Analyze(THaEvData *evdata)
     return 1;
   } else { 			// A normal event
     if (fDebugFile) *fDebugFile<<"\n\nTHcScalerEvtHandler :: Debugging event type "<<dec<<evdata->GetEvType()<< " event num = " << evdata->GetEvNum() << endl<<endl;
-    evNumber=evdata->GetEvNum();
-    evNumberR = evNumber;
     Int_t ret;
     if((ret=AnalyzeBuffer(rdata,fOnlySyncEvents))) {
       if (fDebugFile) *fDebugFile << "scaler tree ptr  "<<fScalerTree<<endl;
@@ -424,7 +427,8 @@ Int_t THcScalerEvtHandler::AnalyzeBuffer(UInt_t* rdata, Bool_t onlysync)
               dvars[ivar]=0.;
 	      if (bcm_ind != -1) {
                  dvars[ivar]=((scalers[idx]->GetData(ichan))/fDeltaTime-fBCM_Offset[bcm_ind])/fBCM_Gain[bcm_ind];
-		 dvars[ivar]=dvars[ivar]+fBCM_SatOffset[bcm_ind]*TMath::Max(dvars[ivar]-fBCM_SatOffset[i],0.0);
+		 dvars[ivar]=dvars[ivar]+fBCM_SatQuadratic[bcm_ind]*TMath::Power(TMath::Max(dvars[ivar]-fBCM_SatOffset[bcm_ind],0.0),2.0);
+
 	      }
          	if (bcm_ind == fbcm_Current_Threshold_Index) scal_current= dvars[ivar];
 	    }
@@ -469,7 +473,7 @@ Int_t THcScalerEvtHandler::AnalyzeBuffer(UInt_t* rdata, Bool_t onlysync)
 	        dvarsFirst[ivar]=0.0;
                 if (bcm_ind != -1) {
                  dvarsFirst[ivar]=((scalers[idx]->GetData(ichan))/fDeltaTime-fBCM_Offset[bcm_ind])/fBCM_Gain[bcm_ind];
-		 dvarsFirst[ivar]=dvarsFirst[ivar]+fBCM_SatQuadratic[bcm_ind]*TMath::Power(TMath::Max(dvars[ivar]-fBCM_SatOffset[i],0.0),2.);
+		 dvarsFirst[ivar]=dvarsFirst[ivar]+fBCM_SatQuadratic[bcm_ind]*TMath::Power(TMath::Max(dvars[ivar]-fBCM_SatOffset[bcm_ind],0.0),2.);
 		}
          	if (bcm_ind == fbcm_Current_Threshold_Index) scal_current= dvarsFirst[ivar];
 	    }
@@ -684,7 +688,7 @@ THaAnalysisObject::EStatus THcScalerEvtHandler::Init(const TDatime& date)
 	UInt_t islot = atoi(dbline[1].c_str());
 	UInt_t ichan = atoi(dbline[2].c_str());
 	UInt_t ikind = atoi(dbline[3].c_str());
-	if (fDebugFile)
+       	if (fDebugFile)
 	  *fDebugFile << "add var "<<dbline[1]<<"   desc = "<<sdesc<<"    islot= "<<islot<<"  "<<ichan<<"  "<<ikind<<endl;
 	TString tsname(dbline[4].c_str());
 	TString tsdesc(sdesc.c_str());
