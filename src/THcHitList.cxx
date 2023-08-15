@@ -185,7 +185,7 @@ The hit list is sorted (by plane, counter) after filling.
 
 */
 Int_t THcHitList::DecodeToHitList( const THaEvData& evdata, Bool_t suppresswarnings ) {
-
+  suppresswarnings=kTRUE;
   if(!fMap) {			// Find the TI slot for ADCs
     // Assumes that all FADCs are in the same crate
     //cout << "Got the Crate map" << endl;

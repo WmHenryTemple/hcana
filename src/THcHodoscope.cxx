@@ -724,7 +724,7 @@ Int_t THcHodoscope::Decode( const THaEvData& evdata )
    *
    */
   // Get the Hall C style hitlist (fRawHitList) for this event
-  Bool_t present = kTRUE;	// Suppress reference time warnings
+  Bool_t present = 0;	// Suppress reference time warnings
   if(fPresentP) {		// if this spectrometer not part of trigger
     present = *fPresentP;
   }
