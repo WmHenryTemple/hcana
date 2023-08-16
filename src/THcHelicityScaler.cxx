@@ -1,4 +1,4 @@
-/** \class THcHelicityScaler
+ /** \class THcHelicityScaler
    \ingroup Base
 
 \brief Event handler for Hall C helicity scalers
@@ -528,9 +528,11 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
   fNTriggers++;
   //  if(isquartet)cout<<endl;
   Int_t quartetphase = (fNTriggers-fFirstCycle)%4;
-  cout << endl<<"fntriggers isquarter ispos qrtPhase fFirstCycle fNBits : "<<endl;
-  
-  cout <<fNTriggers<<"\t\t"<<isquartet<<"\t"<<ispos<<"\t"<<quartetphase<<"\t"<<fFirstCycle<<"\t"<<fNBits<<endl;
+  if(quartetphase==0){
+    cout << endl<<"fntriggers isquarter ispos qrtPhase fFirstCycle fNBits qrtPhase2  actualHell \t delayed seed \t actual seed: "<<endl;
+    cout << "**********************************************************************************"<<endl;
+  }
+  cout <<fNTriggers<<"\t\t"<<isquartet<<"\t"<<ispos<<"\t"<<quartetphase<<"\t"<<fFirstCycle<<"\t"<<fNBits<<"\t";
   //   cout << "Last Reported                   " << bitset<32>(fRingSeed_reported) << endl;
 
   
@@ -538,9 +540,9 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
     if(quartetphase == 3) {
       Int_t predicted = RanBit30(fRingSeed_reported);//ringseed set phase==3 below
    
-   fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF; //ringseed advanced using scaler data
+      fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF; //ringseed advanced using scaler data
       // Check if ringseed_predicted agrees with reported if(fNBits>=30)
-   if(fNBits<30)cout << "Making seed                     " << bitset<32>(fRingSeed_reported) << endl;
+      if(fNBits<30)cout << "Making seed                     " << bitset<32>(fRingSeed_reported) << endl;
       if(fNBits >= 30 && predicted != fRingSeed_reported) {
 	cout << "THcHelicityScaler: Helicity Prediction Failed" << endl;
 	cout << "Reported  (after shift + ispos) " << bitset<32>(fRingSeed_reported) << endl;
@@ -551,7 +553,7 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	cout << "THcHelicityScaler: A " << bitset<32>(fRingSeed_reported) <<
 	  " found at cycle " << fNTriggers << endl;
       }
-    } else if (quartetphase == 3) {
+      //    } else if (quartetphase == 3) {//if not ==0
       if(!isquartet) {
 	cout << "THcHelicityScaler: Quartet bit expected but not set (" <<
 	  fNTriggers << ")" << endl;
@@ -561,9 +563,9 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	fFirstCycle = -100;
       }
     }
-  } else { 			// First cycle not yet identified
+    } else { 			// First cycle not yet identified
     if(isquartet) { // Helicity and quartet signal for next set of scalers
-      fFirstCycle = fNTriggers - 3;
+      fFirstCycle = fNTriggers - 2;
       quartetphase = (fNTriggers-fFirstCycle)%4;
       // Helicity at start of quartet is same as last of quartet, so we can start filling the seed
       fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF;
@@ -574,30 +576,44 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	  " found at cycle " << fNTriggers << endl;
       }
     }
-  }
+    }
   
   if(fNBits>=30) {
+    Int_t seedDelay0=fRingSeed_reported;
     fRingSeed_actual = RanBit30(fRingSeed_reported);
-    fRingSeed_actual = RanBit30(fRingSeed_actual);
-    
+    if(quartetphase!=3)fRingSeed_actual = RanBit30(fRingSeed_actual);
+    Int_t seedDelay8=fRingSeed_actual;
 #define DELAY9
 #ifdef DELAY9
-    cout <<"in delay9 block"<<endl;
-    if(quartetphase == 3) {
-      fRingSeed_actual = RanBit30(fRingSeed_actual);
+    //    cout <<endl<<"in delay9 block"<<endl;
+    cout<<quartetphase<<"\t";
+    //    if(quartetphase == 3) {
+      //      fRingSeed_actual = RanBit30(fRingSeed_actual);
+    //      actualhelicity = (fRingSeed_actual&1)?+1:-1;
+    //    } else {
       actualhelicity = (fRingSeed_actual&1)?+1:-1;
-    } else {
-      actualhelicity = (fRingSeed_actual&1)?+1:-1;
-      if(quartetphase == 0 || quartetphase == 1) {
+      if(quartetphase == 1 || quartetphase == 2) {
 	actualhelicity = -actualhelicity;
       }
-    }
-    quartetphase = (quartetphase+1)%4;
+      //    }
+    Int_t seedDelay9=fRingSeed_actual;
+    //    cout <<" quartetphase before: "<<quartetphase<<endl;
+    //quartetphase = (quartetphase+1)%4;
+    //    cout <<" quartetphase before after: "<<quartetphase<<endl;
+    //    cout<<"Actual helicity: "<<actualhelicity<<" using seed: "<<bitset<32>(fRingSeed_actual)<<endl;
+    
+
+    //    cout <<"done in delay9 block"<<endl;
+    cout << actualhelicity <<"\t"<<bitset<32>(seedDelay0)<<"\t"<<bitset<32>(seedDelay9)<<endl;
+
 #else
+    //    cout <<"in delay9 block else"<<endl;
     actualhelicity = (fRingSeed_actual&1)?+1:-1;
+    cout<<endl<<"Actual before if(quartetphase == 1 || quartetphase == 2): "<<actualhelicity<<" from seed: "<<bitset<32>(fRingSeed_actual)<<endl;
     if(quartetphase == 1 || quartetphase == 2) {
       actualhelicity = -actualhelicity;
     }
+    cout<<"Actual after if(quartetphase == 1 || quartetphase == 2): "<<actualhelicity<<" qrtPhase:"<< quartetphase<<" from seed: "<<bitset<32>(fRingSeed_actual)<<endl;
 #endif
   } else {
     fRingSeed_actual = 0;
@@ -1041,7 +1057,7 @@ Int_t  THcHelicityScaler::RanBit30(Int_t ranseed)
 
   UInt_t newbit = (bit30 ^ bit29 ^ bit28 ^ bit7) & 0x1;
 
-  cout <<"bits7,28,29,30:"<<bit7<<bit28<<bit29<<bit30<< " new bit: "<<newbit<<endl;
+  //  cout <<"bits7,28,29,30:"<<bit7<<bit28<<bit29<<bit30<< " new bit: "<<newbit<<endl;
   ranseed =  ( (ranseed<<1) | newbit ) & 0x3FFFFFFF;
 
   return ranseed;

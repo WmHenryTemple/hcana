@@ -149,7 +149,7 @@ Int_t THcHelicityReader::ReadData( const THaEvData& evdata )
   }
 
   if(titime == 0) {
-    cout << "Event " << evdata.GetEvNum() << " TI Trigger time missing." << endl;
+    //    cout << "Event " << evdata.GetEvNum() << " TI Trigger time missing." << endl;
     //    cout << "Event " << evdata.GetEvNum() << " TI Trigger time missing.  Using FADC trigger time" << endl;
     //    cout << "TI Evnum: " << fROCinfo[kTime].roc << " " <<
     //      evdata.GetData(fROCinfo[kTime].roc,fROCinfo[kTime].slot, 0, 0)
