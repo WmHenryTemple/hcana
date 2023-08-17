@@ -411,6 +411,7 @@ Int_t THcHelicityScaler::Analyze(THaEvData *evdata)
   }  
   
 }
+
 Int_t THcHelicityScaler::AnalyzeBuffer(UInt_t* rdata)
 {
 
@@ -529,9 +530,9 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 
   Int_t quartetphase = (fNTriggers-fFirstCycle)%4;
 
-  
+
   if(fFirstCycle >= -10) {
-    if(quartetphase == 0) {
+    if(quartetphase == 3) {
       Int_t predicted = RanBit30(fRingSeed_reported);
       fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF;
       // Check if ringseed_predicted agrees with reported if(fNBits>=30)
@@ -545,7 +546,6 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	cout << "THcHelicityScaler: A " << bitset<32>(fRingSeed_reported) <<
 	  " found at cycle " << fNTriggers << endl;
       }
-    } else if (quartetphase == 3) {
       if(!isquartet) {
 	cout << "THcHelicityScaler: Quartet bit expected but not set (" <<
 	  fNTriggers << ")" << endl;
@@ -555,9 +555,9 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	fFirstCycle = -100;
       }
     }
-  } else { 			// First cycle not yet identified
+    } else { 			// First cycle not yet identified
     if(isquartet) { // Helicity and quartet signal for next set of scalers
-      fFirstCycle = fNTriggers - 3;
+      fFirstCycle = fNTriggers - 2;
       quartetphase = (fNTriggers-fFirstCycle)%4;
       // Helicity at start of quartet is same as last of quartet, so we can start filling the seed
       fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF;
@@ -567,24 +567,19 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	  " found at cycle " << fNTriggers << endl;
       }
     }
-  }
+    }
   
   if(fNBits>=30) {
     fRingSeed_actual = RanBit30(fRingSeed_reported);
-    fRingSeed_actual = RanBit30(fRingSeed_actual);
-    
+    if(quartetphase!=3)fRingSeed_actual = RanBit30(fRingSeed_actual);
+
 #define DELAY9
 #ifdef DELAY9
-    if(quartetphase == 3) {
-      fRingSeed_actual = RanBit30(fRingSeed_actual);
       actualhelicity = (fRingSeed_actual&1)?+1:-1;
-    } else {
-      actualhelicity = (fRingSeed_actual&1)?+1:-1;
-      if(quartetphase == 0 || quartetphase == 1) {
+      if(quartetphase == 1 || quartetphase == 2) {
 	actualhelicity = -actualhelicity;
       }
-    }
-    quartetphase = (quartetphase+1)%4;
+
 #else
     actualhelicity = (fRingSeed_actual&1)?+1:-1;
     if(quartetphase == 1 || quartetphase == 2) {
@@ -641,16 +636,23 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
   
   
   //Set the helicity scaler clock to define the time
+
+  //  cout<< "fScalerChan[fClockChan] "<<fScalerChan[fClockChan] <<endl;  (This is zero?!)
+  //  cout << "fClockChan " << fClockChan <<endl;
+
+  //  What I figured out
+  // fDeltaTime is zero because fScalerChan is zero.  fClockChannel is 8 
   fDeltaTime = fScalerChan[fClockChan]/fClockFreq;    //total clock counts / clock_frequency (1MHz) for a specific scaler read interval
   fTotalTime = fPrevTotalTime + fDeltaTime;           //cumulative scaler time  
   
+  /*    wmhenry uncomment later 6.23.23
   if (fDeltaTime==0) {
     cout << " *******************   Severe Warning ****************************" << endl;
     cout << "       In THcHelicityScaler have found fDeltaTime is zero !!      " << endl;
     cout << " ******************* Alert DAQ experts ***************************" << endl;
     if (fDebugFile) *fDebugFile << " In THcHelicityScaler have found fDeltaTime is zero !!   " << endl;   
   }
-  
+  */
   fPrevTotalTime=fTotalTime; //set the current total time to the previous time for the upcoming read
  
   //C.Y. Nov 27, 2020 : (below) code to write the helicity raw data to a variable
