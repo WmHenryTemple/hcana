@@ -532,7 +532,7 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 
 
   if(fFirstCycle >= -10) {
-    if(quartetphase == 3) {
+    if(quartetphase == 0) {
       Int_t predicted = RanBit30(fRingSeed_reported);
       fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF;
       // Check if ringseed_predicted agrees with reported if(fNBits>=30)
@@ -555,9 +555,9 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
 	fFirstCycle = -100;
       }
     }
-    } else { 			// First cycle not yet identified
+  } else { 			// First cycle not yet identified
     if(isquartet) { // Helicity and quartet signal for next set of scalers
-      fFirstCycle = fNTriggers - 2;
+      fFirstCycle = fNTriggers;
       quartetphase = (fNTriggers-fFirstCycle)%4;
       // Helicity at start of quartet is same as last of quartet, so we can start filling the seed
       fRingSeed_reported = ((fRingSeed_reported<<1) | ispos) & 0x3FFFFFFF;
@@ -571,7 +571,7 @@ Int_t THcHelicityScaler::AnalyzeHelicityScaler(UInt_t *p)
   
   if(fNBits>=30) {
     fRingSeed_actual = RanBit30(fRingSeed_reported);
-    if(quartetphase!=3)fRingSeed_actual = RanBit30(fRingSeed_actual);
+    fRingSeed_actual = RanBit30(fRingSeed_actual);
 
 #define DELAY9
 #ifdef DELAY9

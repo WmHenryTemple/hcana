@@ -129,7 +129,7 @@ Int_t THcHelicity::ReadDatabase( const TDatime& date )
   fFirstCycle = -1; // First Cycle that starts a quad (0 to 3)
   fNLastQuartet = -1;
   fNQuartet = 0;
-  //  fFreq = 29.5596;
+  //fFreq = 29.5596;
   fFreq = 120.0007547169;
   fHelDelay=8;
 
@@ -390,13 +390,13 @@ Int_t THcHelicity::Decode( const THaEvData& evdata )
       if(fTITime - fLastMPSTime > fTIPeriod) { // We missed MPS periods
 	missed = TMath::Nint(floor((fTITime-fLastMPSTime)/fTIPeriod));
 	if(missed > 1) {
-	  //	  cout << "Missed " << missed << " MPSes" << endl;
+	  cout << "Missed " << missed << " MPSes" << endl;
 	  Int_t newNCycle = fNCycle + missed -1; // How many cycles really missed
 	  Int_t quartets_missed = (newNCycle-fFirstCycle)/4 - (fNCycle-fFirstCycle)/4;
 	  int quartetphase = (newNCycle-fFirstCycle)%4;
-	  //	  cout << "  " << fNCycle << " " << newNCycle << " " << fFirstCycle << " " << quartets_missed << " " << quartetphase << endl;
-	  //	  cout << "Cycles " << fNCycle << " " << newNCycle << " " << fFirstCycle 
-	  //	       << " skipped " << quartets_missed << " quartets" << endl;
+	  cout << "  " << fNCycle << " " << newNCycle << " " << fFirstCycle << " " << quartets_missed << " " << quartetphase << endl;
+	  cout << "Cycles " << fNCycle << " " << newNCycle << " " << fFirstCycle 
+	       << " skipped " << quartets_missed << " quartets" << endl;
 	  fNCycle = newNCycle;
 	  // Need to reset fQuartet to reflect where we are based on the current
 	  // reported helicity.  So we don't fail quartet testing.
